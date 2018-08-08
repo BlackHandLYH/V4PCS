@@ -98,14 +98,23 @@ protected:
     /// @param [in] Q_pairs The second set of pairs.
     /// @param [out] quadrilaterals The set of congruent quadrilateral. In fact,
     /// it's a super set from which we extract the real congruent set.
-    bool FindCongruentQuadrilaterals(
+    /*bool FindCongruentQuadrilaterals(
             Scalar invariant1,
             Scalar invariant2,
             Scalar distance_threshold1,
             Scalar distance_threshold2,
             const PairsVector& P_pairs,
             const PairsVector& Q_pairs,
-            std::vector<Quadrilateral>* quadrilaterals) const override;
+            std::vector<Quadrilateral>* quadrilaterals) const override;*/
+	bool FindCongruentQuadrilaterals(
+		Scalar distance_threshold,
+		const std::vector<std::pair<int, int>>& pairs1,
+		const std::vector<std::pair<int, int>>& pairs2,
+		const std::vector<std::pair<int, int>>& pairs3,
+		const std::vector<std::pair<int, int>>& pairs4,
+		const std::vector<std::pair<int, int>>& pairs5,
+		const std::vector<std::pair<int, int>>& pairs6,
+		std::vector<Quadrilateral>* quadrilaterals) const override;
 
     /// Initializes the data structures and needed values before the match
     /// computation.

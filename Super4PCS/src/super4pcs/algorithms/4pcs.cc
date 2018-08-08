@@ -57,12 +57,13 @@ Match4PCS::Match4PCS(const Match4PCSOptions& options,
 
 Match4PCS::~Match4PCS() { }
 
+/*
 // Finds congruent candidates in the set Q, given the invariants and threshold
 // distances.
 bool Match4PCS::FindCongruentQuadrilaterals(
         Scalar invariant1,
         Scalar invariant2,
-        Scalar /*distance_threshold1*/,
+        Scalar distance_threshold1,
         Scalar distance_threshold2,
         const std::vector<std::pair<int, int>>& P_pairs,
         const std::vector<std::pair<int, int>>& Q_pairs,
@@ -107,7 +108,7 @@ bool Match4PCS::FindCongruentQuadrilaterals(
 
   return quadrilaterals->size() != 0;
 }
-
+*/
 // Constructs two sets of pairs in Q, each corresponds to one pair in the base
 // in P, by having the same distance (up to some tolerantz) and optionally the
 // same angle between normals and same color.
