@@ -75,6 +75,11 @@ MatchSuper4PCS::MatchSuper4PCS(const Match4PCSOptions& options,
 
 MatchSuper4PCS::~MatchSuper4PCS() { }
 
+/// \brief create connectivity table
+/// \param pairs
+/// \param table
+/// \return
+///
 void
 CreateConnectivityTable(
 	const std::vector<std::pair<int, int>>& pairs,
@@ -83,11 +88,17 @@ CreateConnectivityTable(
 	std::vector<std::pair<int, int>>::const_iterator pair = pairs.begin();
 	while (pair != pairs.end())
 	{
+		//if point1 in pair is in the table keys
+		//add point2 to the vector of the table
 		if (table.find((*pair).first) != table.end())
 			table[(*pair).first].emplace_back((*pair).second);
+		//if not
+		//create a new key point1 with a vector of only point2
 		else
 			table.insert(std::pair<int, std::vector<int>>
 			((*pair).first, std::vector<int>(1, (*pair).second)));
+
+		//pair doen't have direction, so both point in pair should become a key in table
 		if (table.find((*pair).second) != table.end())
 			table[(*pair).second].emplace_back((*pair).first);
 		else
@@ -95,6 +106,21 @@ CreateConnectivityTable(
 			((*pair).second, std::vector<int>(1, (*pair).first)));
 		pair++;
 	}
+
+	//Sort all the vectors for getting intersection 
+	std::map<int, std::vector<int>>::iterator it = table.begin();
+
+	for (; it != table.end(); it++)
+	{
+	    std::sort((*it).second.begin(), (*it).second.end());
+	}
+}
+
+bool
+Intersect(std::vector<int>& V1, std::vector<int>& V2, std::vector<int>& V12)
+{
+	std::set_intersection(V1.begin(), V1.end(), V2.begin(), V2.end(), std::inserter(V12, V12.begin()));
+	return !V12.empty();
 }
 
 //Find all congruent tetrahedron
@@ -142,8 +168,79 @@ MatchSuper4PCS::FindCongruentQuadrilaterals(
 	CreateConnectivityTable(pairs5, table5);
 	CreateConnectivityTable(pairs6, table6);
 
-	//Search tables for tetrahedral
 
+	/******
+	*          point4
+	*             ..
+	*         .  .  .
+	*  point1 * .    .
+	*       .  .*     .
+	*      .  .    *   .
+	*     .  .       *  .
+	*  point2 ........point3
+	*/
+	///////////////////////
+	//distance sort by:  d1 p12, d2 p13, d3 p14, d4 p23, d5 p24, d6 p34
+	// Computes distance between pairs.
+	//Search tables for tetrahedral
+	CTable::iterator it1;
+	std::vector<int>::iterator it2, it3, it4;
+	//for every point in table1's key, see it as potential point1
+	for (it1 = table1.begin(); it1 != table1.end(); it1++)
+	{
+		int point1 = (*it1).first;
+		//if point1 doesn't belong to any pair with distance13
+		//it cannot be a good point1
+		if (table2.find(point1) == table2.end())
+			continue;
+		//if point1 doesn't belong to any pair with distance14
+		//it cannot be a good point1
+		if (table3.find(point1) == table3.end())
+			continue;
+		//for every point in pointset which have distance12 with point1
+		for (it2 = table1[point1].begin(); it2 != table1[point1].end(); it2++)
+		{
+			//if point2 doesn't belong to any pair with distance23
+			//it cannot be a good point2
+			if (table4.find(*it2) == table4.end())
+				continue;
+			//if point2 doesn't belong to any pair with distance24
+			//it cannot be a good point2
+			if (table5.find(*it2) == table5.end())
+				continue;
+			std::vector<int> P3;
+			//P3 contains the points
+			//which have distance13 with point1
+			//and distance23 with point2
+			//if P3 is empty, point1&2 are not good
+			if (!Intersect(table2[point1], table4[*it2], P3))
+				continue;
+			//for every point in P3
+			for (it3 = P3.begin(); it3 != P3.end(); it3++)
+			{
+				//if point3 doesn't belong to any pair with distance34
+				//it cannot be a good point3
+				if (table6.find(*it3) == table6.end())
+					continue;
+				std::vector<int> P12_4, P4;
+				//P12_4 contains points
+				//which have distance14 with point1
+				//and have diatance24 with point2
+				if (!Intersect(table3[point1], table5[*it2], P12_4))
+					continue;
+				//P4 contains points
+				//which is in P12_4
+				//and have distance34 with point3
+				if (!Intersect(P12_4, table6[*it3], P4))
+					continue;
+				//if P4 is not empty, then point1~4 can form a congruent tetrahedral
+				for (it4 = P4.begin(); it4 != P4.end(); it4++)
+				{
+					quadrilaterals->emplace_back(point1,*it2,*it3,*it4);
+				}
+			}
+		}
+	}
 	return quadrilaterals->size() != 0;
 }
 /*
