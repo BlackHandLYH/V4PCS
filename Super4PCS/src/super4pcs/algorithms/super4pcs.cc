@@ -46,7 +46,6 @@
 
 #include "super4pcs/algorithms/super4pcs.h"
 #include "super4pcs/accelerators/bbox.h"
-
 #ifdef SUPER4PCS_USE_CHEALPIX
 #include "super4pcs/accelerators/normalHealSet.h"
 #else
@@ -59,6 +58,7 @@
 #include <map>
 
 //#define MULTISCALE
+
 
 namespace GlobalRegistration {
 
@@ -159,6 +159,8 @@ MatchSuper4PCS::FindCongruentQuadrilaterals(
 
 	IndexedNormalSet3D nset(eps);
 
+	clock_t startCCT, endCCT;
+	startCCT = clock();
 	//Create connectivity tables 
 	CTable table1, table2, table3, table4, table5, table6;
 	CreateConnectivityTable(pairs1, table1);
@@ -168,7 +170,10 @@ MatchSuper4PCS::FindCongruentQuadrilaterals(
 	CreateConnectivityTable(pairs5, table5);
 	CreateConnectivityTable(pairs6, table6);
 
-
+	endCCT = clock();
+	double timeOfCCT = (double)(endCCT - startCCT);
+	std::cout << "Create Connectivity Table time:" << timeOfCCT << "ms" << std::endl;
+	
 	/******
 	*          point4
 	*             ..
@@ -182,6 +187,8 @@ MatchSuper4PCS::FindCongruentQuadrilaterals(
 	///////////////////////
 	//distance sort by:  d1 p12, d2 p13, d3 p14, d4 p23, d5 p24, d6 p34
 	// Computes distance between pairs.
+	clock_t startSearch, endSearch;
+	startSearch = clock();
 	//Search tables for tetrahedral
 	CTable::iterator it1;
 	std::vector<int>::iterator it2, it3, it4;
@@ -241,6 +248,11 @@ MatchSuper4PCS::FindCongruentQuadrilaterals(
 			}
 		}
 	}
+
+	endSearch = clock();
+	double timeOfSearch = (double)(endSearch - startSearch);
+	std::cout << "Search tetrahedrals time:" << timeOfSearch << "ms" << std::endl;
+	std::cout << "Number of tetrahedrals:" << (*quadrilaterals).size() << std::endl;
 	return quadrilaterals->size() != 0;
 }
 /*

@@ -284,8 +284,7 @@ protected:
     /// Selects a quadrilateral from P and returns the corresponding invariants
     /// and point indices. Returns true if a quadrilateral has been found, false
     /// otherwise.
-    bool SelectQuadrilateral(Scalar &invariant1, Scalar &invariant2,
-                             int& base1, int& base2, int& base3, int& base4);
+    bool SelectQuadrilateral(int& base1, int& base2, int& base3, int& base4);
 
     const std::vector<Point3D>& base3D() const { return base_3D_; }
 

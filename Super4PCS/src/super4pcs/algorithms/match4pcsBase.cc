@@ -276,11 +276,10 @@ bool Match4PCSBase::TryQuadrilateral(Scalar &invariant1, Scalar &invariant2,
 
 // Selects a good base from P and computes its invariants. Returns false if
 // a good planar base cannot can be found.
-bool Match4PCSBase::SelectQuadrilateral(Scalar& invariant1, Scalar& invariant2,
-                                        int& base1, int& base2, int& base3,
+bool Match4PCSBase::SelectQuadrilateral(int& base1, int& base2, int& base3,
                                         int& base4) {
 
-  const Scalar kBaseTooSmall (0.2);
+  const Scalar kBaseTooSmall (0.4);
   int current_trial = 0;
 
   // Try fix number of times.
@@ -351,7 +350,6 @@ bool Match4PCSBase::SelectQuadrilateral(Scalar& invariant1, Scalar& invariant2,
 
 	//Tetrahedral base
 	// Go over all points in P.
-	Scalar best_distance = std::numeric_limits<Scalar>::max();
 	const Scalar too_small = std::pow(max_base_diameter_ * kBaseTooSmall, 2);
 	for (unsigned int i = 0; i < sampled_P_3D_.size(); ++i) {
 		if ((sampled_P_3D_[i].pos() - sampled_P_3D_[base1].pos()).squaredNorm() >= too_small &&

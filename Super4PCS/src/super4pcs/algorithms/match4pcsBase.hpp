@@ -174,8 +174,8 @@ void Match4PCSBase::init(const std::vector<Point3D>& P,
 	std::cout << "set sample points for Q:		"<< options_.sample_size2 << std::endl;
 	std::cout << "sample points for P during PG:	"<< sampled_P_3D_.size() << std::endl;
 	std::cout << "sample points for Q during PG:	"<< sampled_Q_3D_.size() << std::endl;
-	std::cout << "sample points for P during CVS:	"<< verify_P.size() << std::endl;
-	std::cout << "sample points for Q during CVS:	"<< verify_Q.size() << std::endl;
+	std::cout << "sample points for P during CSV:	"<< verify_P.size() << std::endl;
+	std::cout << "sample points for Q during CSV:	"<< verify_Q.size() << std::endl;
 
     // center points around centroids
     auto centerPoints = [](std::vector<Point3D>&container,
@@ -362,7 +362,7 @@ bool Match4PCSBase::TryOneBase(const Visitor &v) {
 
 #else
 
-  if (!SelectQuadrilateral(invariant1, invariant2, base_id1, base_id2,
+  if (!SelectQuadrilateral(base_id1, base_id2,
                            base_id3, base_id4)) {
     return false;
   }
@@ -421,7 +421,7 @@ bool Match4PCSBase::TryOneBase(const Visitor &v) {
   std::cout << "  time of pair generation: " << timeOfExPairs << "ms" << std::endl;
 
   std::cout << "Pair creation ouput: \n";
-  std::cout << "		Distance	Size" << std::endl;
+  std::cout << "	Distance	Size" << std::endl;
   std::cout << "Pair1	" << distance1 << "	" << pairs1.size() << std::endl;
   std::cout << "Pair2	" << distance2 << "	" << pairs2.size() << std::endl;
   std::cout << "Pair3	" << distance3 << "	" << pairs3.size() << std::endl;
@@ -454,6 +454,7 @@ bool Match4PCSBase::TryOneBase(const Visitor &v) {
 	  std::cout << "  time of CSE:" << timeOfFindCS << "ms" << std::endl;
 	  std::cout << "  number of CS:" << congruent_quads.size() << std::endl;
   }
+  std::cout << "Mark1" << std::endl;
   size_t nb = 0;
 
   clock_t startTryCS, endTryCS;
@@ -463,7 +464,7 @@ bool Match4PCSBase::TryOneBase(const Visitor &v) {
                                congruent_quads,
                                v,
                                nb);
-
+  std::cout << "Mark2" << std::endl;
   endTryCS = clock();
   double timeOfTryCS = (double)(endTryCS - startTryCS);
   if (time_display)
