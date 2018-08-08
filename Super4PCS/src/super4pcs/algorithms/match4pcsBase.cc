@@ -294,6 +294,8 @@ bool Match4PCSBase::SelectQuadrilateral(Scalar& invariant1, Scalar& invariant2,
     base_3D_[1] = sampled_P_3D_[base2];
     base_3D_[2] = sampled_P_3D_[base3];
 
+	//Original planar 4-point base
+	/*
     // The 4th point will be a one that is close to be planar to the other 3
     // while still not too close to them.
     const double x1 = base_3D_[0].x();
@@ -344,8 +346,30 @@ bool Match4PCSBase::SelectQuadrilateral(Scalar& invariant1, Scalar& invariant2,
       }
     }
     current_trial++;
-  }
+	*/
 
+
+	//Tetrahedral base
+	// Go over all points in P.
+	Scalar best_distance = std::numeric_limits<Scalar>::max();
+	const Scalar too_small = std::pow(max_base_diameter_ * kBaseTooSmall, 2);
+	for (unsigned int i = 0; i < sampled_P_3D_.size(); ++i) {
+		if ((sampled_P_3D_[i].pos() - sampled_P_3D_[base1].pos()).squaredNorm() >= too_small &&
+			(sampled_P_3D_[i].pos() - sampled_P_3D_[base2].pos()).squaredNorm() >= too_small &&
+			(sampled_P_3D_[i].pos() - sampled_P_3D_[base3].pos()).squaredNorm() >= too_small) {
+			// Not too close to any of the first 3.
+			base4 = int(i);
+			break;
+		}
+	}
+	// If we have a good one we can quit.
+	if (base4 != -1) {
+		base_3D_[3] = sampled_P_3D_[base4];
+			return true;
+	}
+	current_trial++;
+  }
+  
   // We failed to find good enough base..
   return false;
 }

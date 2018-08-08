@@ -323,12 +323,14 @@ protected:
     /// @param [out] quadrilaterals The set of congruent quadrilateral. In fact,
     /// it's a super set from which we extract the real congruent set.
     virtual bool
-    FindCongruentQuadrilaterals(Scalar invariant1, Scalar invariant2,
-                                Scalar distance_threshold1,
-                                Scalar distance_threshold2,
-                                const PairsVector& P_pairs,
-                                const PairsVector& Q_pairs,
-                                std::vector<Quadrilateral>* quadrilaterals) const = 0;
+    FindCongruentQuadrilaterals(Scalar distance_threshold,
+		const std::vector<std::pair<int, int>>& pairs1,
+		const std::vector<std::pair<int, int>>& pairs2,
+		const std::vector<std::pair<int, int>>& pairs3,
+		const std::vector<std::pair<int, int>>& pairs4,
+		const std::vector<std::pair<int, int>>& pairs5,
+		const std::vector<std::pair<int, int>>& pairs6,
+		std::vector<Quadrilateral>* quadrilaterals) const = 0;
 
     /// Loop over the set of congruent 4-points and test compatiliby with the
     /// input base.

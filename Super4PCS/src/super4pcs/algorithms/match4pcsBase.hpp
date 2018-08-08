@@ -368,16 +368,36 @@ bool Match4PCSBase::TryOneBase(const Visitor &v) {
   }
 #endif
 
+  /******
+  *          point3
+  *             ..
+  *         .  .  .
+  *  point0 * .    .
+  *       .  .*     .
+  *      .  .    *   .
+  *     .  .       *  .
+  *  point1 ........point2
+  */
+  ///////////////////////
+  //distance sort by:  p01, p02, p03, p12, p13, p23
   // Computes distance between pairs.
-  const Scalar distance1 = (base_3D_[0].pos()- base_3D_[1].pos()).norm();
-  const Scalar distance2 = (base_3D_[2].pos()- base_3D_[3].pos()).norm();
+  const Scalar distance1 = (base_3D_[0].pos() - base_3D_[1].pos()).norm();
+  const Scalar distance2 = (base_3D_[0].pos() - base_3D_[2].pos()).norm();
+  const Scalar distance3 = (base_3D_[0].pos() - base_3D_[3].pos()).norm();
+  const Scalar distance4 = (base_3D_[1].pos() - base_3D_[2].pos()).norm();
+  const Scalar distance5 = (base_3D_[1].pos() - base_3D_[3].pos()).norm();
+  const Scalar distance6 = (base_3D_[2].pos() - base_3D_[3].pos()).norm();
 
-  std::vector<std::pair<int, int>> pairs1, pairs2;
+  std::vector<std::pair<int, int>> pairs1, pairs2, pairs3, pairs4, pairs5, pairs6;
   std::vector<Quadrilateral> congruent_quads;
 
   // Compute normal angles.
   const Scalar normal_angle1 = (base_3D_[0].normal() - base_3D_[1].normal()).norm();
-  const Scalar normal_angle2 = (base_3D_[2].normal() - base_3D_[3].normal()).norm();
+  const Scalar normal_angle2 = (base_3D_[0].normal() - base_3D_[2].normal()).norm();
+  const Scalar normal_angle3 = (base_3D_[0].normal() - base_3D_[3].normal()).norm();
+  const Scalar normal_angle4 = (base_3D_[1].normal() - base_3D_[2].normal()).norm();
+  const Scalar normal_angle5 = (base_3D_[1].normal() - base_3D_[3].normal()).norm();
+  const Scalar normal_angle6 = (base_3D_[2].normal() - base_3D_[3].normal()).norm();
 
   clock_t startExPairs, endExPairs;
   startExPairs = clock();
@@ -386,26 +406,45 @@ bool Match4PCSBase::TryOneBase(const Visitor &v) {
                   1, &pairs1);
   ExtractPairs(distance2, normal_angle2, distance_factor * options_.delta, 2,
                   3, &pairs2);
+  ExtractPairs(distance3, normal_angle3, distance_factor * options_.delta, 0,
+	  1, &pairs3);
+  ExtractPairs(distance4, normal_angle4, distance_factor * options_.delta, 0,
+	  1, &pairs4);
+  ExtractPairs(distance5, normal_angle5, distance_factor * options_.delta, 0,
+	  1, &pairs5);
+  ExtractPairs(distance6, normal_angle6, distance_factor * options_.delta, 0,
+	  1, &pairs6);
 
   endExPairs = clock();
   double timeOfExPairs = (double)(endExPairs - startExPairs);
   if (time_display)
   std::cout << "  time of pair generation: " << timeOfExPairs << "ms" << std::endl;
 
-  std::cout<< "Pair creation ouput: "<<pairs1.size()<<" - "<<pairs2.size()<<std::endl;
+  std::cout << "Pair creation ouput: \n";
+  std::cout << "		Distance	Size" << std::endl;
+  std::cout << "Pair1	" << distance1 << "	" << pairs1.size() << std::endl;
+  std::cout << "Pair2	" << distance2 << "	" << pairs2.size() << std::endl;
+  std::cout << "Pair3	" << distance3 << "	" << pairs3.size() << std::endl;
+  std::cout << "Pair4	" << distance4 << "	" << pairs4.size() << std::endl;
+  std::cout << "Pair5	" << distance5 << "	" << pairs5.size() << std::endl;
+  std::cout << "Pair6	" << distance6 << "	" << pairs6.size() << std::endl;
 
-  if (pairs1.size() == 0 || pairs2.size() == 0) {
+  if (pairs1.size() == 0 || pairs2.size() == 0
+	  || pairs3.size() == 0 || pairs4.size() == 0
+	  || pairs5.size() == 0 || pairs6.size() == 0) {
     return false;
   }
 
   clock_t startFindCS, endFindCS;
   startFindCS = clock();
 
-  if (!FindCongruentQuadrilaterals(invariant1, invariant2,
-                                   distance_factor * options_.delta,
-                                   distance_factor * options_.delta,
+  if (!FindCongruentQuadrilaterals(distance_factor * options_.delta,
                                    pairs1,
                                    pairs2,
+								   pairs3,
+								   pairs4,
+							       pairs5,
+								   pairs6,
                                    &congruent_quads)) {
     return false;
   }

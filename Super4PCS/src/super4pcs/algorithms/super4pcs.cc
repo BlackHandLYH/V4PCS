@@ -56,7 +56,7 @@
 #include <fstream>
 #include <array>
 #include <time.h>
-
+#include <map>
 
 //#define MULTISCALE
 
@@ -75,13 +75,85 @@ MatchSuper4PCS::MatchSuper4PCS(const Match4PCSOptions& options,
 
 MatchSuper4PCS::~MatchSuper4PCS() { }
 
+void
+CreateConnectivityTable(
+	const std::vector<std::pair<int, int>>& pairs,
+	std::map<int,std::vector<int>>& table)
+{
+	std::vector<std::pair<int, int>>::const_iterator pair = pairs.begin();
+	while (pair != pairs.end())
+	{
+		if (table.find((*pair).first) != table.end())
+			table[(*pair).first].emplace_back((*pair).second);
+		else
+			table.insert(std::pair<int, std::vector<int>>
+			((*pair).first, std::vector<int>(1, (*pair).second)));
+		if (table.find((*pair).second) != table.end())
+			table[(*pair).second].emplace_back((*pair).first);
+		else
+			table.insert(std::pair<int, std::vector<int>>
+			((*pair).second, std::vector<int>(1, (*pair).first)));
+		pair++;
+	}
+}
+
+//Find all congruent tetrahedron
+bool
+MatchSuper4PCS::FindCongruentQuadrilaterals(
+	Scalar distance_threshold,
+	const std::vector<std::pair<int, int>>& pairs1,
+	const std::vector<std::pair<int, int>>& pairs2,
+	const std::vector<std::pair<int, int>>& pairs3,
+	const std::vector<std::pair<int, int>>& pairs4,
+	const std::vector<std::pair<int, int>>& pairs5,
+	const std::vector<std::pair<int, int>>& pairs6,
+	std::vector<Quadrilateral>* quadrilaterals) const {
+
+
+	typedef PairCreationFunctor<Scalar>::Point Point;
+	typedef std::map<int, std::vector<int>> CTable;
+#ifdef SUPER4PCS_USE_CHEALPIX
+	typedef GlobalRegistration::IndexedNormalHealSet IndexedNormalSet3D;
+#else
+	typedef  GlobalRegistration::IndexedNormalSet
+		< Point,   //! \brief Point type used internally
+		3,       //! \brief Nb dimension
+		7,       //! \brief Nb cells/dim normal
+		Scalar>  //! \brief Scalar type
+		IndexedNormalSet3D;
+#endif
+
+
+	if (quadrilaterals == nullptr) return false;
+
+	quadrilaterals->clear();
+
+	// 1. Datastructure construction
+	const Scalar eps = pcfunctor_.getNormalizedEpsilon(distance_threshold);
+
+	IndexedNormalSet3D nset(eps);
+
+	//Create connectivity tables 
+	CTable table1, table2, table3, table4, table5, table6;
+	CreateConnectivityTable(pairs1, table1);
+	CreateConnectivityTable(pairs2, table2);
+	CreateConnectivityTable(pairs3, table3);
+	CreateConnectivityTable(pairs4, table4);
+	CreateConnectivityTable(pairs5, table5);
+	CreateConnectivityTable(pairs6, table6);
+
+	//Search tables for tetrahedral
+
+	return quadrilaterals->size() != 0;
+}
+/*
 // Finds congruent candidates in the set Q, given the invariants and threshold
 // distances.
 bool
 MatchSuper4PCS::FindCongruentQuadrilaterals(
         Scalar invariant1,
         Scalar invariant2,
-        Scalar /*distance_threshold1*/,
+        Scalar distance_threshold1,
         Scalar distance_threshold2,
         const std::vector<std::pair<int, int>>& P_pairs,
         const std::vector<std::pair<int, int>>& Q_pairs,
@@ -175,7 +247,7 @@ MatchSuper4PCS::FindCongruentQuadrilaterals(
 
   return quadrilaterals->size() != 0;
 }
-
+*/
 
 // Constructs two sets of pairs in Q, each corresponds to one pair in the base
 // in P, by having the same distance (up to some tolerantz) and optionally the
